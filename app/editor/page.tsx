@@ -11,6 +11,7 @@ import { getBOMData, getExplanation, saveBOMEdits } from '@/lib/api';
 import { BOMItem, MBOMItem } from '@/lib/types';
 import Link from 'next/link';
 
+
 export default function EditorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
