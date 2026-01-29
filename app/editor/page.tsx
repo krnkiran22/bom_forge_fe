@@ -9,6 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { getBOMData, getExplanation, saveBOMEdits } from '@/lib/api';
 import { BOMItem, MBOMItem } from '@/lib/types';
+import { DependencyGraph } from '@/components/DependencyGraph';
+import { EnhancedAIPanel } from '@/components/EnhancedAIPanel';
+import { EditableBOMItem } from '@/components/EditableBOMItem';
+import { Network, List, Download, Save } from 'lucide-react';
+import { exportToCSV, exportToExcel, exportToPDF } from '@/lib/utils/exportUtils';
 import Link from 'next/link';
 
 
@@ -22,6 +27,10 @@ export default function EditorPage() {
   const [ebomItems, setEbomItems] = useState<BOMItem[]>([]);
   const [mbomItems, setMbomItems] = useState<MBOMItem[]>([]);
   const [explanation, setExplanation] = useState<any>(null);
+  const [viewMode, setViewMode] = useState<'tree' | 'graph'>('tree');
+  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const [stats, setStats] = useState({
     totalParts: 0,
     addedParts: 0,
@@ -93,9 +102,62 @@ export default function EditorPage() {
     }
   };
 
-  const handleExport = () => {
-    // TODO: Implement export functionality
-    alert('Export feature coming soon!');
+  const handleSaveItem = (partNumber: string, updates: Partial<any>) => {
+    setMbomItems(prev =>
+      prev.map(item =>
+        item.partNumber === partNumber ? { ...item, ...updates } : item
+      )
+    );
+    setHasUnsavedChanges(true);
+  };
+
+  const handleDeleteItem = (partNumber: string) => {
+    setMbomItems(prev => prev.filter(item => item.partNumber !== partNumber));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveAllChanges = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/convert/bom/${conversionId}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mbomData: { items: mbomItems, totalParts: mbomItems.length }
+          })
+        }
+      );
+
+      if (response.ok) {
+        setHasUnsavedChanges(false);
+        alert('✅ Changes saved successfully!');
+      } else {
+        alert('❌ Failed to save changes');
+      }
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      alert('❌ Failed to save changes');
+    }
+  };
+
+  const handleExport = (format: 'csv' | 'excel' | 'pdf') => {
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = `mbom-${timestamp}`;
+    
+    switch (format) {
+      case 'csv':
+        exportToCSV(mbomItems, `${filename}.csv`);
+        break;
+      case 'excel':
+        exportToExcel(mbomItems, `${filename}.xlsx`);
+        break;
+      case 'pdf':
+        exportToPDF(mbomItems, `${filename}.pdf`);
+        break;
+    }
+    
+    setShowExportMenu(false);
   };
 
   if (loading) {
@@ -144,12 +206,51 @@ export default function EditorPage() {
               <Button variant="outline" onClick={() => router.push('/history')}>
                 History
               </Button>
-              <Button variant="outline" onClick={handleSave}>
-                Save Changes
+              <Button 
+                variant="outline" 
+                onClick={handleSaveAllChanges}
+                disabled={!hasUnsavedChanges}
+                className={hasUnsavedChanges ? 'bg-yellow-50 border-yellow-300' : ''}
+              >
+                {hasUnsavedChanges ? '💾 Save Changes *' : 'Save Changes'}
               </Button>
-              <Button onClick={handleExport} className="bg-teal-600 hover:bg-teal-700">
-                Export →
-              </Button>
+              
+              {/* Export Dropdown */}
+              <div className="relative">
+                <Button 
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  className="bg-teal-600 hover:bg-teal-700 flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Export
+                </Button>
+
+                {showExportMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                    <button
+                      onClick={() => handleExport('csv')}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors border-b border-gray-100 flex items-center gap-2"
+                    >
+                      <span>📊</span>
+                      <span>Export as CSV</span>
+                    </button>
+                    <button
+                      onClick={() => handleExport('excel')}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors border-b border-gray-100 flex items-center gap-2"
+                    >
+                      <span>📈</span>
+                      <span>Export as Excel</span>
+                    </button>
+                    <button
+                      onClick={() => handleExport('pdf')}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-100 transition-colors flex items-center gap-2"
+                    >
+                      <span>📄</span>
+                      <span>Export as PDF</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -189,105 +290,195 @@ export default function EditorPage() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
+        {/* View Mode Toggle */}
+        <div className="flex bg-white rounded-lg p-1 mb-4 w-fit shadow-sm border">
+          <button
+            onClick={() => setViewMode('tree')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              viewMode === 'tree'
+                ? 'bg-teal-600 text-white shadow'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <List className="h-4 w-4" />
+            <span>Tree View</span>
+          </button>
+          <button
+            onClick={() => setViewMode('graph')}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              viewMode === 'graph'
+                ? 'bg-teal-600 text-white shadow'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <Network className="h-4 w-4" />
+            <span>Graph View</span>
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* BOM Comparison - Left 2/3 */}
+          {/* BOM View - Left 2/3 */}
           <div className="lg:col-span-2">
-            <Card className="p-6">
-              <Tabs defaultValue="comparison" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
-                  <TabsTrigger value="ebom">eBOM ({ebomItems.length})</TabsTrigger>
-                  <TabsTrigger value="comparison">Comparison</TabsTrigger>
-                  <TabsTrigger value="mbom">mBOM ({mbomItems.length})</TabsTrigger>
-                </TabsList>
+            {viewMode === 'tree' ? (
+              <Card className="p-6">
+                <Tabs defaultValue="comparison" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="ebom">eBOM ({ebomItems.length})</TabsTrigger>
+                    <TabsTrigger value="comparison">Comparison</TabsTrigger>
+                    <TabsTrigger value="mbom">mBOM ({mbomItems.length})</TabsTrigger>
+                  </TabsList>
 
-                <TabsContent value="ebom" className="mt-4">
-                  <BOMTree items={ebomItems} type="ebom" />
-                </TabsContent>
+                  <TabsContent value="ebom" className="mt-4">
+                    <BOMTree items={ebomItems} type="ebom" />
+                  </TabsContent>
 
-                <TabsContent value="comparison" className="mt-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-700 mb-3">eBOM</h3>
-                      <BOMTree items={ebomItems} type="ebom" compact />
+                  <TabsContent value="comparison" className="mt-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-700 mb-3">eBOM</h3>
+                        <BOMTree items={ebomItems} type="ebom" compact />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-slate-700 mb-3">mBOM</h3>
+                        <BOMTree items={mbomItems} type="mbom" compact />
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-700 mb-3">mBOM</h3>
-                      <BOMTree items={mbomItems} type="mbom" compact />
+                  </TabsContent>
+
+                  <TabsContent value="mbom" className="mt-4">
+                    <div className="space-y-2 max-h-[600px] overflow-y-auto">
+                      {mbomItems.map((item) => (
+                        <EditableBOMItem
+                          key={item.partNumber}
+                          item={item}
+                          onSave={handleSaveItem}
+                          onDelete={handleDeleteItem}
+                        />
+                      ))}
                     </div>
+                  </TabsContent>
+                </Tabs>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                <Card className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-slate-800 flex items-center space-x-2">
+                      <Network className="h-5 w-5 text-teal-600" />
+                      <span>Dependency Graph</span>
+                    </h2>
+                    <Badge variant="secondary">{mbomItems.length} nodes</Badge>
                   </div>
-                </TabsContent>
+                  <DependencyGraph
+                    items={mbomItems}
+                    onNodeClick={(item) => setSelectedNode(item)}
+                  />
+                </Card>
 
-                <TabsContent value="mbom" className="mt-4">
-                  <BOMTree items={mbomItems} type="mbom" />
-                </TabsContent>
-              </Tabs>
-            </Card>
+                {/* Selected Node Details */}
+                {selectedNode && (
+                  <Card className="p-6 bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-300">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h3 className="text-xl font-bold text-slate-900">{selectedNode.partNumber}</h3>
+                          {selectedNode.confidence && (
+                            <Badge className="bg-purple-100 text-purple-700">
+                              {(selectedNode.confidence * 100).toFixed(0)}% confident
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-slate-600 mb-4">{selectedNode.description}</p>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          {selectedNode.quantity && (
+                            <div className="bg-white p-3 rounded-lg">
+                              <p className="text-xs text-slate-500">Quantity</p>
+                              <p className="text-sm font-semibold text-slate-900">{selectedNode.quantity}</p>
+                            </div>
+                          )}
+                          {selectedNode.workCenter && (
+                            <div className="bg-white p-3 rounded-lg">
+                              <p className="text-xs text-slate-500">Work Center</p>
+                              <p className="text-sm font-semibold text-slate-900">{selectedNode.workCenter}</p>
+                            </div>
+                          )}
+                          {selectedNode.materialSpec && (
+                            <div className="bg-white p-3 rounded-lg">
+                              <p className="text-xs text-slate-500">Material</p>
+                              <p className="text-sm font-semibold text-slate-900">{selectedNode.materialSpec}</p>
+                            </div>
+                          )}
+                          {selectedNode.level !== undefined && (
+                            <div className="bg-white p-3 rounded-lg">
+                              <p className="text-xs text-slate-500">Level</p>
+                              <p className="text-sm font-semibold text-slate-900">{selectedNode.level}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {selectedNode.reasoning && (
+                          <div className="mt-4 p-4 bg-white rounded-lg border-l-4 border-purple-500">
+                            <p className="text-xs text-slate-500 mb-1 font-semibold">AI Reasoning:</p>
+                            <p className="text-sm text-slate-700 italic">{selectedNode.reasoning}</p>
+                          </div>
+                        )}
+
+                        {selectedNode.dependencies && selectedNode.dependencies.length > 0 && (
+                          <div className="mt-4 p-4 bg-white rounded-lg">
+                            <p className="text-xs text-slate-500 mb-2 font-semibold">Depends on:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedNode.dependencies.map((dep: string) => (
+                                <Badge key={dep} variant="secondary" className="font-mono text-xs">
+                                  {dep}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => setSelectedNode(null)}
+                        className="ml-4 p-2 hover:bg-blue-100 rounded-lg transition-colors text-slate-500 hover:text-slate-700"
+                      >
+                        <span className="text-xl">×</span>
+                      </button>
+                    </div>
+                  </Card>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* AI Explanation - Right 1/3 */}
+          {/* Enhanced AI Panel - Right 1/3 */}
           <div className="lg:col-span-1">
-            <Card className="p-6 sticky top-24">
-              <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center">
-                <span className="mr-2">🧠</span>
-                AI Analysis
-              </h2>
-
-              {explanation && (
-                <div className="space-y-4 text-sm">
-                  <div>
-                    <h3 className="font-semibold text-slate-700 mb-2">Summary</h3>
-                    <p className="text-slate-600 leading-relaxed">
-                      {explanation.summary || 'AI successfully converted eBOM to manufacturing-ready mBOM with optimized grouping and work center assignments.'}
-                    </p>
-                  </div>
-
-                  <div>
-                    <h3 className="font-semibold text-slate-700 mb-2">Key Changes</h3>
-                    <ul className="space-y-2">
-                      {explanation.keyChanges?.map((change: string, idx: number) => (
-                        <li key={idx} className="flex items-start space-x-2">
-                          <span className="text-teal-600 mt-1">•</span>
-                          <span className="text-slate-600">{change}</span>
-                        </li>
-                      )) || (
-                        <>
-                          <li className="flex items-start space-x-2">
-                            <span className="text-green-600">✓</span>
-                            <span className="text-slate-600">Added manufacturing tooling and fixtures</span>
-                          </li>
-                          <li className="flex items-start space-x-2">
-                            <span className="text-blue-600">↻</span>
-                            <span className="text-slate-600">Grouped sub-assemblies for efficient production</span>
-                          </li>
-                          <li className="flex items-start space-x-2">
-                            <span className="text-orange-600">⚙</span>
-                            <span className="text-slate-600">Assigned optimal work centers</span>
-                          </li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
-
-                  {explanation.reasoning && (
-                    <div>
-                      <h3 className="font-semibold text-slate-700 mb-2">AI Reasoning</h3>
-                      <p className="text-slate-600 text-xs leading-relaxed bg-slate-50 p-3 rounded">
-                        {explanation.reasoning}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="pt-4 border-t">
-                    <Button variant="outline" className="w-full" size="sm">
-                      📝 Provide Feedback
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </Card>
+            <EnhancedAIPanel
+              stats={{
+                totalParts: stats.totalParts,
+                added: stats.addedParts,
+                modified: stats.modifiedParts,
+                grouped: stats.groupedParts,
+                avgConfidence: stats.avgConfidence,
+              }}
+              explanation={explanation}
+            />
           </div>
         </div>
       </div>
+
+      {/* Floating Save Button */}
+      {hasUnsavedChanges && (
+        <div className="fixed bottom-6 right-6 z-50">
+          <button
+            onClick={handleSaveAllChanges}
+            className="px-6 py-3 bg-gradient-to-r from-teal-600 to-green-600 text-white rounded-xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all font-bold flex items-center gap-2 animate-bounce"
+          >
+            <Save className="h-5 w-5" />
+            Save All Changes
+          </button>
+        </div>
+      )}
     </div>
   );
 }
