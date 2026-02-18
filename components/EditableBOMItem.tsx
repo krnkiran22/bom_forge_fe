@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Pencil, Save, X, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
+import { Pencil, Save, X, Trash2, ChevronDown, ChevronRight, ChevronUp } from 'lucide-react';
 
 interface BOMItem {
   partNumber: string;
@@ -19,9 +19,11 @@ interface EditableBOMItemProps {
   item: BOMItem;
   onSave: (partNumber: string, updates: Partial<BOMItem>) => void;
   onDelete: (partNumber: string) => void;
+  onFeedback?: (partNumber: string, isPositive: boolean) => void;
+  onReorder?: (partNumber: string, direction: 'up' | 'down') => void;
 }
 
-export function EditableBOMItem({ item, onSave, onDelete }: EditableBOMItemProps) {
+export function EditableBOMItem({ item, onSave, onDelete, onFeedback, onReorder }: EditableBOMItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
   const [editedItem, setEditedItem] = useState(item);
@@ -151,7 +153,7 @@ export function EditableBOMItem({ item, onSave, onDelete }: EditableBOMItemProps
         <div className="flex-1">
           <div className="flex items-center gap-2">
             {/* Expand/Collapse */}
-            <button 
+            <button
               onClick={() => setIsExpanded(!isExpanded)}
               className="p-1 hover:bg-gray-200 rounded"
             >
@@ -163,7 +165,7 @@ export function EditableBOMItem({ item, onSave, onDelete }: EditableBOMItemProps
             </button>
 
             <span className="font-bold text-gray-900">{item.partNumber}</span>
-            
+
             {item.confidence && (
               <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold">
                 {(item.confidence * 100).toFixed(0)}% confident
@@ -174,7 +176,7 @@ export function EditableBOMItem({ item, onSave, onDelete }: EditableBOMItemProps
           {isExpanded && (
             <>
               <p className="text-sm text-gray-600 mt-2 ml-6">{item.description}</p>
-              
+
               <div className="flex flex-wrap gap-2 ml-6 mt-2 text-xs">
                 <span className="bg-gray-100 px-2 py-1 rounded font-medium">
                   Qty: {item.quantity || 1}
@@ -202,6 +204,40 @@ export function EditableBOMItem({ item, onSave, onDelete }: EditableBOMItemProps
 
         {/* Action Buttons */}
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+          <div className="flex flex-col gap-0.5 mr-1">
+            <button
+              onClick={() => onReorder?.(item.partNumber, 'up')}
+              className="p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-900"
+              title="Move Up"
+            >
+              <ChevronUp className="h-3 w-3" />
+            </button>
+            <button
+              onClick={() => onReorder?.(item.partNumber, 'down')}
+              className="p-1 hover:bg-gray-100 rounded text-gray-500 hover:text-gray-900"
+              title="Move Down"
+            >
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </div>
+
+          <button
+            onClick={() => onFeedback?.(item.partNumber, true)}
+            className="p-2 hover:bg-green-100 rounded-lg text-green-600"
+            title="Looks Correct"
+          >
+            <span className="text-lg">👍</span>
+          </button>
+          <button
+            onClick={() => onFeedback?.(item.partNumber, false)}
+            className="p-2 hover:bg-orange-100 rounded-lg text-orange-600"
+            title="Needs Correction"
+          >
+            <span className="text-lg">👎</span>
+          </button>
+
+          <div className="w-px h-6 bg-gray-200 mx-1 self-center" />
+
           <button
             onClick={() => setIsEditing(true)}
             className="p-2 hover:bg-blue-100 rounded-lg text-blue-600"
