@@ -41,10 +41,10 @@ export interface ConversionStatus {
 
 export interface ConversionHistory {
   conversionId: string;
-  fileName: string;
+  filename: string;
   status: string;
   ebomPartCount: number;
-  mbomPartCount: number;
+  itemsCount: number;
   confidenceScore: number;
   timeTaken: number;
   createdAt: string;
