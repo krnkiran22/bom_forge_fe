@@ -7,6 +7,7 @@ import { Button } from './ui/button';
 
 export const BetaGate = ({ children }: { children: React.ReactNode }) => {
     const [showGate, setShowGate] = useState(false);
+    const [isDismissed, setIsDismissed] = useState(false);
 
     useEffect(() => {
         const env = process.env.NEXT_PUBLIC_APP_ENV;
@@ -15,7 +16,7 @@ export const BetaGate = ({ children }: { children: React.ReactNode }) => {
         }
     }, []);
 
-    if (!showGate) return <>{children}</>;
+    if (!showGate || isDismissed) return <>{children}</>;
 
     return (
         <div className="relative min-h-screen">
@@ -29,11 +30,14 @@ export const BetaGate = ({ children }: { children: React.ReactNode }) => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     className="w-full max-w-lg bg-white rounded-[40px] mac-shadow overflow-hidden relative"
                 >
-                    <div className="absolute top-6 right-6">
-                        <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300">
+                    <button
+                        onClick={() => setIsDismissed(true)}
+                        className="absolute top-6 right-6 group transition-transform active:scale-95"
+                    >
+                        <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-slate-100 group-hover:text-slate-900 transition-colors">
                             <X className="w-5 h-5" />
                         </div>
-                    </div>
+                    </button>
 
                     <div className="p-12 text-center space-y-8">
                         <div className="w-24 h-24 bg-amber-50 rounded-[32px] flex items-center justify-center mx-auto border-2 border-amber-100 mac-shadow animate-float">
