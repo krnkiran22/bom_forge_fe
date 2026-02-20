@@ -140,7 +140,7 @@ export default function HistoryPage() {
                                         <div className="flex items-center gap-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
                                             <span className="flex items-center gap-1.5"><Calendar className="w-3 h-3" /> {new Date(item.createdAt).toLocaleDateString()}</span>
                                             <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3" /> {item.itemsCount || 0} Nodes</span>
-                                            <span className="text-teal-600">ID: {item.conversionId.slice(-8).toUpperCase()}</span>
+                                            <span className="text-teal-600">ID: {item.conversionId?.slice(-8).toUpperCase() || 'N/A'}</span>
                                         </div>
                                     </div>
                                 </div>
