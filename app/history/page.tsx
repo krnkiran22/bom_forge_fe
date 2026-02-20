@@ -12,9 +12,10 @@ import {
     LayoutDashboard, Sparkles, Filter, ChevronRight,
     Database, Clock, CheckCircle2
 } from 'lucide-react';
+import { BetaGate } from '@/components/BetaGate';
 import Link from 'next/link';
 
-export default function HistoryPage() {
+function HistoryContent() {
     const router = useRouter();
     const [history, setHistory] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -177,5 +178,12 @@ export default function HistoryPage() {
                 </div>
             </footer>
         </div>
+    );
+}
+export default function HistoryPage() {
+    return (
+        <BetaGate>
+            <HistoryContent />
+        </BetaGate>
     );
 }

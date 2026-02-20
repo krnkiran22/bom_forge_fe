@@ -18,10 +18,11 @@ import { FeedbackModal } from '@/components/FeedbackModal';
 import {
   Network, List, Download, Save, Plus, ArrowLeft, History, Filter,
   FileSpreadsheet, Settings2, Sparkles, ChevronDown, ChevronRight,
-  Info, AlertTriangle, LayoutDashboard, Box, CheckCircle2
+  Info, AlertTriangle, LayoutDashboard, Box, CheckCircle2, Search, Maximize2, Minimize2, Trash, Check, X, Wand2, RefreshCcw
 } from 'lucide-react';
+import { BetaGate } from '@/components/BetaGate';
 
-export default function EditorPage() {
+function EditorContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const conversionId = searchParams.get('conversionId');
@@ -556,5 +557,12 @@ function BOMTreeItem({ item, type, compact, expanded, onToggle }: { item: any; t
         )}
       </div>
     </div>
+  );
+}
+export default function EditorPage() {
+  return (
+    <BetaGate>
+      <EditorContent />
+    </BetaGate>
   );
 }
