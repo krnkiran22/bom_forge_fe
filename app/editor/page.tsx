@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -562,7 +562,14 @@ function BOMTreeItem({ item, type, compact, expanded, onToggle }: { item: any; t
 export default function EditorPage() {
   return (
     <BetaGate>
-      <EditorContent />
+      <Suspense fallback={
+        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+          <div className="w-16 h-16 border-4 border-teal-100 border-t-teal-600 rounded-full animate-spin mb-4" />
+          <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Initialising Studio...</p>
+        </div>
+      }>
+        <EditorContent />
+      </Suspense>
     </BetaGate>
   );
 }
