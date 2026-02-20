@@ -29,8 +29,8 @@ export default function HistoryPage() {
         try {
             setLoading(true);
             const response = await getConversionHistory(1, 100);
-            if (response.success) {
-                setHistory(response.data.conversions);
+            if (response.success && response.data) {
+                setHistory(response.data.conversions || []);
             }
         } catch (err) {
             setError('Failed to fetch conversion history');
@@ -50,10 +50,13 @@ export default function HistoryPage() {
         }
     };
 
-    const filteredHistory = history.filter(item =>
-        item.filename?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.conversionId?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredHistory = (history || []).filter(item => {
+        if (!item) return false;
+        const fn = item.filename || 'Untitled Assembly';
+        const cid = item.conversionId || '';
+        return fn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            cid.toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
     return (
         <div className="min-h-screen bg-[#FBFBFD] flex flex-col font-sans">
