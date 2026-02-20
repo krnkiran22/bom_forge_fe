@@ -191,7 +191,7 @@ export default function EditorPage() {
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-400 rounded-lg mac-shadow" />
+              <img src="/logo.png" alt="BOMForge AI Logo" className="w-8 h-8 object-contain drop-shadow-sm transition-transform group-hover:scale-110" />
               <span className="text-xl font-bold tracking-tight text-[#1D1D1F]">BOMForge <span className="text-teal-600 font-black">STUDIO</span></span>
             </Link>
             <div className="h-6 w-px bg-slate-200" />

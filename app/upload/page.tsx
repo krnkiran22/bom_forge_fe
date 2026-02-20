@@ -82,7 +82,7 @@ export default function UploadPage() {
       <nav className="fixed w-full z-50 bg-white/70 backdrop-blur-xl border-b border-gray-200/50">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-emerald-400 rounded-lg mac-shadow" />
+            <img src="/logo.png" alt="BOMForge AI Logo" className="w-8 h-8 object-contain drop-shadow-sm transition-transform hover:scale-110" />
             <span className="text-xl font-bold tracking-tight text-[#1D1D1F]">BOMForge <span className="text-teal-600">AI</span></span>
           </Link>
           <div className="flex items-center gap-8">

@@ -84,7 +84,7 @@ function ConversionContent() {
       <header className="border-b border-gray-200/50 bg-white/70 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-400 rounded-xl mac-shadow rotate-3 group-hover:rotate-0 transition-transform duration-300" />
+            <img src="/logo.png" alt="BOMForge AI Logo" className="w-10 h-10 object-contain drop-shadow-sm group-hover:scale-110 transition-transform duration-300" />
             <span className="text-xl font-bold tracking-tight text-[#1D1D1F]">BOMForge <span className="text-teal-600">AI</span></span>
           </Link>
           <div className="flex items-center gap-4">
