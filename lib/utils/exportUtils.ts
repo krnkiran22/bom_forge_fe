@@ -48,7 +48,6 @@ export function exportToExcel(items: BOMItem[], filename: string = 'bom-export.x
     'Level': item.level || 0,
     'Work Center': item.workCenter || '',
     'Material Spec': item.materialSpec || '',
-    'Confidence': item.confidence ? `${(item.confidence * 100).toFixed(0)}%` : '',
     'Change Type': item.changeType || 'unchanged',
   }));
 
@@ -56,18 +55,33 @@ export function exportToExcel(items: BOMItem[], filename: string = 'bom-export.x
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'mBOM');
 
+  // Summary Sheet
+  const avgConfidence = items.length > 0
+    ? Math.round((items.reduce((sum, i) => sum + (i.confidence || 0), 0) / items.length) * 100)
+    : 0;
+
+  const summaryData = [
+    { 'Metric': 'Total Assemblies', 'Value': items.length },
+    { 'Metric': 'Added Nodes', 'Value': items.filter(i => i.changeType === 'added').length },
+    { 'Metric': 'Modified Nodes', 'Value': items.filter(i => i.changeType === 'modified').length },
+    { 'Metric': 'Overall Neural Confidence', 'Value': `${avgConfidence}%` },
+    { 'Metric': 'Export Date', 'Value': new Date().toLocaleString() },
+  ];
+  const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+  XLSX.utils.book_append_sheet(workbook, summarySheet, 'Synthesis Summary');
+
   // Add styling (column widths)
   const colWidths = [
-    { wch: 15 }, // Part Number
-    { wch: 40 }, // Description
+    { wch: 20 }, // Part Number
+    { wch: 45 }, // Description
     { wch: 10 }, // Quantity
-    { wch: 8 },  // Level
-    { wch: 20 }, // Work Center
-    { wch: 20 }, // Material Spec
-    { wch: 12 }, // Confidence
-    { wch: 12 }, // Change Type
+    { wch: 10 }, // Level
+    { wch: 25 }, // Work Center
+    { wch: 25 }, // Material Spec
+    { wch: 15 }, // Change Type
   ];
   worksheet['!cols'] = colWidths;
+  summarySheet['!cols'] = [{ wch: 25 }, { wch: 25 }];
 
   XLSX.writeFile(workbook, filename);
 }

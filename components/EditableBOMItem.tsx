@@ -165,12 +165,6 @@ export function EditableBOMItem({ item, onSave, onDelete, onFeedback, onReorder 
             </button>
 
             <span className="font-bold text-gray-900">{item.partNumber}</span>
-
-            {item.confidence && (
-              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold">
-                {(item.confidence * 100).toFixed(0)}% confident
-              </span>
-            )}
           </div>
 
           {isExpanded && (

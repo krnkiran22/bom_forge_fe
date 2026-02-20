@@ -12,10 +12,10 @@ export default function LandingPage() {
             {/* Navigation */}
             <nav className="fixed w-full z-50 bg-white/70 backdrop-blur-xl border-b border-gray-200/50">
                 <div className="container mx-auto px-6 h-18 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-400 rounded-xl mac-shadow" />
-                        <span className="text-2xl font-black tracking-tighter text-[#1D1D1F]">BOMForge <span className="text-teal-600">AI</span></span>
-                    </div>
+                    <Link href="/" className="flex items-center gap-3">
+                        <img src="/logo.png" alt="BOMForge AI Logo" className="w-8 h-8 object-contain drop-shadow-sm" />
+                        <span className="text-xl font-bold tracking-tight text-[#1D1D1F]">BOMForge <span className="text-teal-600">AI</span></span>
+                    </Link>
                     <div className="hidden md:flex items-center gap-10">
                         <Link href="#features" className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Platform</Link>
                         <Link href="#analytics" className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Intelligence</Link>
@@ -196,10 +196,10 @@ export default function LandingPage() {
             <footer className="py-20 px-6 border-t border-slate-100 bg-white">
                 <div className="container mx-auto grid grid-cols-2 lg:grid-cols-4 gap-20">
                     <div className="col-span-2 lg:col-span-1 space-y-6">
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-slate-900 rounded-lg" />
-                            <span className="text-xl font-bold tracking-tighter text-slate-900 uppercase">BOMForge</span>
-                        </div>
+                        <Link href="/" className="flex items-center gap-3 group">
+                            <img src="/logo.png" alt="BOMForge AI Logo" className="w-8 h-8 object-contain drop-shadow-sm" />
+                            <span className="text-xl font-bold tracking-tight text-slate-900">BOMForge <span className="text-teal-600">AI</span></span>
+                        </Link>
                         <p className="text-slate-500 font-medium leading-relaxed">The next generation of Bill of Materials management. Built for modern factory orchestration and digital twin synchronization.</p>
                     </div>
                     <div className="space-y-6">

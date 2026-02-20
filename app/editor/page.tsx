@@ -250,17 +250,26 @@ export default function EditorPage() {
               <span className="text-sm font-bold text-slate-900">{stats.totalParts} Parts</span>
             </div>
             <div className="h-8 w-px bg-slate-100" />
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               {[
-                { label: 'Added', val: stats.addedParts, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100' },
-                { label: 'Modified', val: stats.modifiedParts, color: 'text-amber-600', bg: 'bg-amber-50 border-amber-100' },
-                { label: 'Neural Accuracy', val: `${stats.avgConfidence}%`, color: 'text-teal-600', bg: 'bg-teal-50 border-teal-100' }
+                { label: 'Added', val: stats.addedParts, color: 'text-emerald-600', bg: 'bg-emerald-50/50 border-emerald-100' },
+                { label: 'Modified', val: stats.modifiedParts, color: 'text-amber-600', bg: 'bg-amber-50/50 border-amber-100' },
               ].map((s, i) => (
                 <div key={i} className={`px-4 py-1.5 rounded-full border ${s.bg} flex items-center gap-2`}>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{s.label}:</span>
                   <span className={`text-xs font-black ${s.color}`}>{s.val}</span>
                 </div>
               ))}
+              <div className="px-6 py-1.5 rounded-full bg-slate-900 border border-slate-800 flex items-center gap-3 mac-shadow ml-2">
+                <div className="flex flex-col items-center">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-3 h-3 text-teal-400 animate-pulse" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Conversion Accuracy</span>
+                  </div>
+                </div>
+                <div className="w-px h-6 bg-white/10" />
+                <span className="text-sm font-black text-teal-400">{stats.avgConfidence}%</span>
+              </div>
             </div>
           </div>
 
@@ -512,12 +521,6 @@ function BOMTreeItem({ item, type, compact, expanded, onToggle }: { item: any; t
                   }`}>
                   {item.changeType}
                 </span>
-              )}
-              {type === 'mbom' && item.confidence && (
-                <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-teal-500" />
-                  <span className="text-[10px] font-bold text-teal-600">{Math.round(item.confidence * 100)}% Match</span>
-                </div>
               )}
             </div>
             <p className={`${compact ? 'text-[11px]' : 'text-sm'} font-medium text-slate-500 leading-tight truncate`}>{item.description}</p>

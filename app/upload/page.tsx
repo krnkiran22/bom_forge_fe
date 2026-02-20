@@ -129,14 +129,24 @@ export default function UploadPage() {
                   <div className="w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-100 mac-shadow group-hover:scale-110 transition-transform">
                     <UploadCloud className="w-10 h-10 text-slate-400" />
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-slate-800 tracking-tight">
-                      {isDragActive ? 'Release to Import' : 'Drop eBOM File'}
+                  <div className="space-y-2">
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                      {isDragActive ? 'Release to Import' : 'Drop Engineering BOM'}
                     </h3>
-                    <p className="text-slate-500 mt-1 font-medium italic">Supports .xlsx, .xls, .csv</p>
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 text-emerald-700 rounded-md border border-emerald-100 text-[10px] font-black uppercase tracking-widest">
+                        <FileText className="w-3 h-3" /> CSV
+                      </div>
+                      <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 text-blue-700 rounded-md border border-blue-100 text-[10px] font-black uppercase tracking-widest">
+                        <span className="text-sm font-bold leading-none">📊</span> XLSX
+                      </div>
+                      <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-50 text-amber-700 rounded-md border border-amber-100 text-[10px] font-black uppercase tracking-widest">
+                        <span className="text-sm font-bold leading-none">📉</span> XLS
+                      </div>
+                    </div>
                   </div>
                   <Button variant="secondary" className="rounded-full px-8 bg-slate-900 text-white hover:bg-black font-bold text-sm tracking-wide mac-btn">
-                    Choose Locally
+                    Browse Filesystems
                   </Button>
                 </div>
               ) : (
